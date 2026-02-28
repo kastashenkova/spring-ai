@@ -1,6 +1,6 @@
 # Semantic Search on Spring AI
 
-An information retrieval fullstack web application for semantic search across FB2 documents using vector embeddings and Spring AI.
+An information retrieval fullstack web application for semantic search across FB2 documents using vector embeddings and Spring AI (NLP based).
 
 When a document is uploaded, its text is split into chunks via `TokenTextSplitter` and stored in a vector database as embeddings. On search, the query is also converted to an embedding and compared against stored vectors using cosine similarity — returning the most semantically relevant fragments, not just keyword matches.
 
