@@ -3,33 +3,34 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Semantic Searching on Spring AI</title>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <title>Semantic search on Spring AI</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap"
+          rel="stylesheet">
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
 <header>
-    <div class="logo">Semantic Searching <span>on Spring AI</span></div>
+    <div class="logo">SEMANTIC SEARCH <span>ON SPRING AI</span></div>
 </header>
 
 <div class="layout">
     <aside class="sidebar">
         <div class="sidebar-section">
-            <div class="label">Upload FB2</div>
+            <div class="label">Upload your book</div>
             <div class="drop-zone" id="dropZone">
-                <input type="file" id="fileInput" accept=".fb2">
-                <div class="drop-icon">📄</div>
-                <div class="drop-text"><strong>Click or drag file</strong>.fb2</div>
+                <input type="file" id="fileInput" accept=".fb2" multiple>
+                <div class="drop-text"><strong>Add file here</strong>.fb2</div>
                 <div class="file-name" id="fileName"></div>
             </div>
             <button class="btn-upload" id="uploadBtn" disabled>Upload</button>
         </div>
-        <div class="sidebar-section" style="padding-bottom:10px">
-            <div class="label">Documents <span id="docCountBadge" style="color:var(--blue-dark)"></span></div>
+        <div class="label">
+            <span style="margin-left: 20px;">Documents</span>
+            <span id="docCountBadge" style="color:var(--blue-dark)"></span>
         </div>
         <div class="docs-scroll" id="docsList">
-            <div class="no-docs">No documents yet.<br>Upload an FB2 to start.</div>
+            <div class="no-docs">No documents uploaded</div>
         </div>
     </aside>
 
@@ -37,7 +38,7 @@
         <div class="search-row">
             <div class="scope-pill" id="scopePill">All docs</div>
             <div class="search-wrap">
-                <input type="text" id="searchInput" placeholder="Enter your query" autocomplete="on">
+                <label for="searchInput"></label><input type="text" id="searchInput" placeholder="Enter your query" autocomplete="on">
             </div>
             <div class="page-row">
                 <button class="btn-page" id="prevBtn" disabled>←</button>

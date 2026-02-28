@@ -1,9 +1,9 @@
 package info.search.controller;
 
 import info.search.dto.DocDto;
+import info.search.dto.DocShortDto;
 import info.search.dto.SearchDto;
 import info.search.dto.SearchResultDto;
-import info.search.model.Doc;
 import info.search.service.DocService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -14,10 +14,15 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
-
-import java.util.List;
 
 @Tag(name = "Documents management",
         description = "Endpoints for managing documents")
@@ -30,16 +35,17 @@ public class DocController {
     @GetMapping()
     @Operation(summary = "Get all docs",
             description = "Get all documents existing in db")
-    public Page<DocDto> getAllDocs(Pageable pageable) {
+    public Page<DocShortDto> getAllDocs(Pageable pageable) {
         return service.getAll(pageable);
     }
 
     @GetMapping("/{id}")
     @Operation(summary = "Search doc by its id",
             description = "Get document's name by its id in database")
-    public DocDto getById(@PathVariable long id) {
+    public ResponseEntity<DocDto> getById(@PathVariable long id) {
         return service.getById(id)
-                .orElse(null);
+                .map(ResponseEntity::ok)
+                .orElse(ResponseEntity.notFound().build());
     }
 
     @DeleteMapping("/{id}")

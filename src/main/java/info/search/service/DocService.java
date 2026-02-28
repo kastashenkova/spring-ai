@@ -3,6 +3,7 @@ package info.search.service;
 import java.util.Optional;
 
 import info.search.dto.DocDto;
+import info.search.dto.DocShortDto;
 import info.search.dto.SearchResultDto;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -10,7 +11,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 public interface DocService {
 
-    Page<DocDto> getAll(Pageable pageable);
+    Page<DocShortDto> getAll(Pageable pageable);
 
     DocDto uploadDocument(MultipartFile file);
 

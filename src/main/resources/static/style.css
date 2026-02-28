@@ -1,12 +1,12 @@
 :root {
-    --blue:      #b6caf6;
+    --blue: #b6caf6;
     --blue-dark: #1e61f0;
-    --black:     #0a0a0a;
-    --white:     #ffffff;
-    --gray:      #f4f6fb;
-    --gray-mid:  #e2e8f5;
-    --text-muted:#7a8aaa;
-    --radius:    10px;
+    --black: #0a0a0a;
+    --white: #ffffff;
+    --gray: #f4f6fb;
+    --gray-mid: #e2e8f5;
+    --text-muted: #7a8aaa;
+    --radius: 10px;
 }
 
 *, *::before, *::after {
@@ -400,6 +400,13 @@ header {
     letter-spacing: 1px;
     text-transform: uppercase;
     margin-bottom: 5px;
+}
+
+.card-source {
+    font-size: 0.68rem;
+    font-weight: 500;
+    color: var(--text-muted);
+    margin-bottom: 8px;
 }
 
 .card-text {

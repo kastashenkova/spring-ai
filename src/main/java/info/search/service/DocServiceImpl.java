@@ -6,6 +6,7 @@ import java.util.Objects;
 import java.util.Optional;
 import info.search.Fb2Parser;
 import info.search.dto.DocDto;
+import info.search.dto.DocShortDto;
 import info.search.dto.SearchResultDto;
 import info.search.exception.EmptyQueryException;
 import info.search.exception.UnknownDocumentException;
@@ -37,9 +38,9 @@ public class DocServiceImpl implements DocService {
     private final VectorStore vectorStore;
 
     @Override
-    public Page<DocDto> getAll(Pageable pageable) {
+    public Page<DocShortDto> getAll(Pageable pageable) {
         return repo.findAll(pageable)
-                .map(docMapper::toDto);
+                .map(docMapper::toShortDto);
     }
 
     @Override
@@ -55,7 +56,7 @@ public class DocServiceImpl implements DocService {
                 .map(docMapper::toDto);
     }
 
-    @Transactional
+    @Transactional(rollbackFor = Exception.class)
     @Override
     public DocDto uploadDocument(MultipartFile file) {
         try {
@@ -65,11 +66,11 @@ public class DocServiceImpl implements DocService {
 
             Document document = new Document(
                     doc.getContent(),
-                    Map.of("docId", saved.getId(), "title", doc.getTitle())
+                    Map.of("docId", saved.getId(),
+                            "title", doc.getTitle(),
+                            "author", doc.getAuthor())
             );
             List<Document> chunks = splitter.apply(List.of(document));
-            vectorStore.add(chunks);
-
             List<DocChunk> docChunks = chunks.stream()
                     .map(c -> {
                         DocChunk dc = new DocChunk();
@@ -78,6 +79,11 @@ public class DocServiceImpl implements DocService {
                         return dc;
                     }).toList();
             chunkRepo.saveAll(docChunks);
+            try {
+                vectorStore.add(chunks);
+            } catch (Exception e) {
+                throw new UploadingDocumentException("Vector store failed: " + file, e);
+            }
             return saved;
         } catch (UploadingDocumentException e) {
             throw e;
@@ -96,27 +102,40 @@ public class DocServiceImpl implements DocService {
             throw new UnknownDocumentException("Document with id " + docId + " not found");
         }
 
+        int topK = (pageable.getPageNumber() + 1) * pageable.getPageSize() + 1;
+
         SearchRequest.Builder builder = SearchRequest.builder()
                 .query(query)
-                .topK(pageable.getPageSize());
+                .topK(topK)
+                .similarityThreshold(0.002);
 
         if (docId != null) {
             builder.filterExpression("docId == " + docId);
         }
 
-        List<SearchResultDto> res = Objects.requireNonNull(
-                vectorStore.similaritySearch(builder.build()))
+        List<SearchResultDto> list = Objects.requireNonNull(
+                        vectorStore.similaritySearch(builder.build()))
                 .stream()
                 .map(doc -> {
-                    Long foundDocId = ((Number) doc.getMetadata()
-                            .get("docId"))
-                            .longValue();
+                    Long foundDocId = ((Number) doc.getMetadata().get("docId")).longValue();
                     String title = (String) doc.getMetadata().get("title");
-                    return new SearchResultDto(foundDocId, title, doc.getText());
+                    String author = (String) doc.getMetadata().get("author");
+                    return new SearchResultDto(foundDocId, title, author, doc.getText());
                 })
                 .toList();
 
-        return new PageImpl<>(res, pageable, res.size());
+        boolean hasNext = list.size() > (pageable.getPageNumber() + 1) * pageable.getPageSize();
+
+        List<SearchResultDto> res = list.subList(
+                pageable.getPageNumber() * pageable.getPageSize(),
+                Math.min(list.size(), (pageable.getPageNumber() + 1) * pageable.getPageSize())
+        );
+
+        long total = hasNext
+                ? (long) (pageable.getPageNumber() + 2) * pageable.getPageSize()
+                : (long) pageable.getPageNumber() * pageable.getPageSize() + res.size();
+
+        return new PageImpl<>(res, pageable, total);
     }
 
     @Transactional

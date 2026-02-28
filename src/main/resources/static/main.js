@@ -6,19 +6,19 @@ let activeDocId = null;
 let currentPage = 0;
 let lastQuery = '';
 
-const dropZone      = document.getElementById('dropZone');
-const fileInput     = document.getElementById('fileInput');
-const fileNameEl    = document.getElementById('fileName');
-const uploadBtn     = document.getElementById('uploadBtn');
-const docsList      = document.getElementById('docsList');
+const dropZone = document.getElementById('dropZone');
+const fileInput = document.getElementById('fileInput');
+const fileNameEl = document.getElementById('fileName');
+const uploadBtn = document.getElementById('uploadBtn');
+const docsList = document.getElementById('docsList');
 const docCountBadge = document.getElementById('docCountBadge');
-const scopePill     = document.getElementById('scopePill');
-const searchInput   = document.getElementById('searchInput');
-const prevBtn       = document.getElementById('prevBtn');
-const nextBtn       = document.getElementById('nextBtn');
-const pageNum       = document.getElementById('pageNum');
-const searchBtn     = document.getElementById('searchBtn');
-const results       = document.getElementById('results');
+const scopePill = document.getElementById('scopePill');
+const searchInput  = document.getElementById('searchInput');
+const prevBtn = document.getElementById('prevBtn');
+const nextBtn = document.getElementById('nextBtn');
+const pageNum = document.getElementById('pageNum');
+const searchBtn = document.getElementById('searchBtn');
+const results = document.getElementById('results');
 
 // docs
 async function loadDocs() {
@@ -103,47 +103,65 @@ function updateScope() {
 
 // upload
 fileInput.addEventListener('change', () => {
-    const f = fileInput.files[0];
-    fileNameEl.textContent = f ? f.name : '';
-    uploadBtn.disabled = !f;
+    const files = Array.from(fileInput.files);
+    fileNameEl.textContent = files.length
+        ? files.map(f => f.name).join(', ')
+        : '';
+    uploadBtn.disabled = !files.length;
 });
+
 dropZone.addEventListener('dragover', e => {
     e.preventDefault(); dropZone.classList.add('drag');
 });
+
 dropZone.addEventListener('dragleave', () => dropZone.classList.remove('drag'));
+
 dropZone.addEventListener('drop', e => {
     e.preventDefault(); dropZone.classList.remove('drag');
-    const f = e.dataTransfer.files[0];
-    if (!f?.name.toLowerCase().endsWith('.fb2')) {
+    const files = Array.from(e.dataTransfer.files)
+        .filter(f => f.name.toLowerCase().endsWith('.fb2'));
+    if (!files.length) {
         return toast('Only .fb2 files supported', 'err');
     }
-    const dt = new DataTransfer(); dt.items.add(f);
+    const dt = new DataTransfer();
+    files.forEach(f => dt.items.add(f));
     fileInput.files = dt.files;
-    fileNameEl.textContent = f.name;
+    fileNameEl.textContent = files.map(f => f.name).join(', ');
     uploadBtn.disabled = false;
 });
 
 uploadBtn.addEventListener('click', async () => {
-    const file = fileInput.files[0];
-    if (!file) {
+    const files = Array.from(fileInput.files);
+    if (!files.length) {
         return;
     }
     uploadBtn.disabled = true;
     uploadBtn.innerHTML = '<span class="spin"></span> Uploading…';
-    const form = new FormData();
-    form.append('file', file);
-    try {
-        const res = await fetch(`${API}/docs`, { method: 'POST', body: form });
-        if (!res.ok) {
-            throw new Error(await res.text());
+
+    let success = 0;
+    let failed = 0;
+
+    for (const file of files) {
+        const form = new FormData();
+        form.append('file', file);
+        try {
+            const res = await fetch(`${API}/docs`, { method: 'POST', body: form });
+            if (!res.ok) {
+                throw new Error(await res.text());
+            }
+            success++;
+        } catch (e) {
+            failed++;
+            toast(`Failed: ${file.name} — ${e.message}`, 'err');
         }
-        fileInput.value = '';
-        fileNameEl.textContent = '';
-        toast(`"${file.name}" uploaded`);
-        await loadDocs();
-    } catch (e) {
-        toast('Upload failed: ' + e.message, 'err');
     }
+
+    fileInput.value = '';
+    fileNameEl.textContent = '';
+    if (success > 0) {
+        toast(`Uploaded ${success} file${success !== 1 ? 's' : ''}${failed > 0 ? `, ${failed} failed` : ''}`);
+    }
+    await loadDocs();
     uploadBtn.innerHTML = 'Upload';
     uploadBtn.disabled = true;
 });
@@ -211,7 +229,14 @@ function renderResults(items, page, isLast) {
         const card = document.createElement('div');
         card.className = 'card';
         card.style.animationDelay = `${i * 0.04}s`;
-        card.innerHTML = `<div class="card-num">Fragment ${page * PAGE_SIZE + i + 1}</div><div class="card-text">${esc(item.fragment)}</div>`;
+
+        const author = item.author ? ` · ${esc(item.author)}` : '';
+
+        card.innerHTML = `
+            <div class="card-num">Fragment ${page * PAGE_SIZE + i + 1}</div>
+            <div class="card-source">${esc(item.title ?? '')}${author}</div>
+            <div class="card-text">${esc(item.fragment)}</div>
+        `;
         results.appendChild(card);
     });
 }
