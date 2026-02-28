@@ -6,7 +6,7 @@ When a document is uploaded, its text is split into chunks via `TokenTextSplitte
 
 **Backend:**
 - Java 23, Spring Boot 3.4.2 (ACID properties)
-- Spring AI milestone-release M5: embeddings, vector store, token splitter, Hierarchical Navigable Small World (HNSW), approximate nearest neighbor (ANN) and cosine distance algorithms for searching
+- Spring AI milestone-release M5 (Ollama launch): embeddings, vector store, token splitter, Hierarchical Navigable Small World (HNSW), approximate nearest neighbor (ANN) and cosine distance algorithms for searching
 - PostgreSQL, pgvector (relational and vector storage)
 - Spring Data JPA, Swagger, OpenAPI
 
