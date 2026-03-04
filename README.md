@@ -24,9 +24,13 @@ When a document is uploaded, its text is split into chunks via `TokenTextSplitte
 | `DELETE` | `/docs/{id}` | Delete doc by its id |
 | `POST` | `/docs/search` | Semantic search |
 
-
 Backend available at `http://localhost:8088/api/`
 
 JSON specification available at `http://localhost:8088/api/v3/api-docs`
 
 Swagger UI available at `http://localhost:8088/api/swagger-ui.html`
+
+
+Presentation (Ukrainian) available at `https://www.canva.com/design/DAHCPNM1wy8/RWUA7A6meGo02CX2RBsEvA/view?utm_content=DAHCPNM1wy8&utm_campaign=designshare&utm_medium=link2&utm_source=uniquelinks&utlId=hd3f892db48`
+
+Report (Ukrainian) available at `https://drive.google.com/file/d/1GGoUB8f4KpwscoUtQ1vSJi_0qSJxnPPW/view?usp=sharing`
